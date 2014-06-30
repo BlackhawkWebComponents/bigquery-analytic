@@ -22,6 +22,9 @@
         "polymer"
     ],
     "dependencies": {
-        "polymer": "Polymer/polymer#>=0.3.0 <1.0.0"
+        "polymer": "Polymer/polymer#>=0.3.0 <1.0.0",
+        "bigquery-api": "BlackhawkWebComponents/bigquery-api#master",
+        "bigquery-query": "BlackhawkWebComponents/bigquery-query#master",
+        "bd3-bar-chart": "BlackhawkWebComponents/bd3-bar-chart#master"
     }
 }

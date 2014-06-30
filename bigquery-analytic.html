@@ -1,0 +1,129 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../bigquery-api/bigquery-api.html">
+<link rel="import" href="../bigquery-query/bigquery-query.html">
+<link rel="import" href="../bd3-bar-chart/bd3-bar-chart.html">
+
+<!--
+Element providing analytic graph for google big query
+
+##### Example
+
+    <bigquery-analytic title="Actor Known Groups" projectId="blackhawk-website" chartType="bar">
+        <q-select>
+            <q-field expr="actor1knowngroupcode"></q-field>
+            <q-field expr="count(*)" as="actor1_knowngroup_count"></q-field>
+        </q-select>
+        <q-from>
+            <q-dataset name="[gdelt-bq:full.events]"></q-dataset>
+        </q-from>
+        <q-where>
+            <q-condition field="actor1knowngroupcode" op="isnotnull"></q-condition>
+            <q-condition field="actiongeo_countrycode" op="equals" value="'IZ'"></q-condition>
+            <q-condition field="year" op="equals" value="2014"></q-condition>
+        </q-where>
+        <q-group-by fields="['actor1knowngroupcode']"></q-group-by>
+    </bigquery-analytic>
+
+@element bigquery-analytic
+@blurb Element providing analytic graph for google big query
+@status alpha
+@url http://blackhawkwebcomponents.github.io/bigquery-analytic
+-->
+<polymer-element name="bigquery-analytic"
+                 attributes="title chartType projectId"
+                 on-query-change="{{queryChanged}}">
+    <template>
+        <style></style>
+
+        <bigquery-query outputQuery="{{query}}">
+            <content select="q-select"></content>
+            <content select="q-from"></content>
+            <content select="q-where"></content>
+            <content select="q-group-by"></content>
+        </bigquery-query>
+
+        <bigquery-api query="{{query.sql}}"
+                      projectId="{{projectId}}"
+                      response="{{response}}">
+        </bigquery-api>
+
+        <!-- TODO: add support for more charts, maybe make this something the user of this element provides -->
+        <template if="{{chartType == 'bar'}}">
+            <bd3-bar-chart
+                    title="{{title}}"
+                    data="{{chartData}}"
+                    width="900"
+                    height="500"
+                    xValue="actor1knowngroupcode"
+                    yValue="actor1_knowngroup_count"
+                    yAxisText="Count"
+                    on-bar-clicked="{{analyticItemSelected}}">
+            </bd3-bar-chart>
+        </template>
+
+    </template>
+    <script>
+        Polymer('bigquery-analytic', {
+            /**
+             * Fired when a analytic item is clicked on chart
+             *
+             * @event analytic-item-selected
+             */
+
+            /**
+             * A title to be displayed on top of the analytic.
+             * @attribute title
+             * @type string
+             */
+            title: 'My Analytic',
+            /**
+             * Type of chart to be used (bar, ...)
+             * @attribute chartType
+             * @type string
+             */
+            chartType: null,
+            /**
+             * Google Big Query project Id to be used
+             * @attribute projectId
+             * @type string
+             */
+            projectId: null,
+            created: function () {
+                this.chartData = {};
+            },
+            responseChanged: function() {
+                this.chartData = this.chartFormat(this.response);
+            },
+            queryChanged: function(event, detail) {
+                console.log('query changed: ' + JSON.stringify(detail));
+            },
+            json: function(value) {
+                return JSON.stringify(value, null, 2);
+            },
+            chartFormat: function(value) {
+                var bqResponse = value;
+                var arr = [];
+                if (bqResponse && bqResponse.rows) {
+                    for (var i = 0; i < bqResponse.rows.length; ++i) {
+                        var row = bqResponse.rows[i];
+                        var outrow = {};
+                        for (var j = 0; j < row.f.length; ++j) {
+                            var val;
+                            if (bqResponse.schema.fields[j].type == 'INTEGER')
+                                val = parseInt(row.f[j].v);
+                            else
+                                val = row.f[j].v;
+                            outrow[bqResponse.schema.fields[j].name] = val;
+                        }
+                        arr.push(outrow);
+                    }
+                }
+                return arr;
+            },
+            analyticItemSelected: function(event, detail) {
+                this.fire('analytic-item-selected', detail);
+            }
+        });
+    </script>
+</polymer-element>
+

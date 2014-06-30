@@ -8,7 +8,11 @@ Element providing analytic graph for google big query
 
 ##### Example
 
-    <bigquery-analytic title="Actor Known Groups" projectId="blackhawk-website" chartType="bar">
+    <bigquery-analytic
+        title="Actor Known Groups"
+        projectId="blackhawk-website"
+        chartType="bar">
+
         <q-select>
             <q-field expr="actor1knowngroupcode"></q-field>
             <q-field expr="count(*)" as="actor1_knowngroup_count"></q-field>
@@ -17,11 +21,20 @@ Element providing analytic graph for google big query
             <q-dataset name="[gdelt-bq:full.events]"></q-dataset>
         </q-from>
         <q-where>
-            <q-condition field="actor1knowngroupcode" op="isnotnull"></q-condition>
-            <q-condition field="actiongeo_countrycode" op="equals" value="'IZ'"></q-condition>
-            <q-condition field="year" op="equals" value="2014"></q-condition>
+            <q-condition
+                field="actor1knowngroupcode"
+                op="isnotnull"></q-condition>
+            <q-condition
+                field="actiongeo_countrycode"
+                op="equals" 
+                value="'IZ'"></q-condition>
+            <q-condition
+                field="year"
+                op="equals"
+                value="2014"></q-condition>
         </q-where>
         <q-group-by fields="['actor1knowngroupcode']"></q-group-by>
+
     </bigquery-analytic>
 
 @element bigquery-analytic

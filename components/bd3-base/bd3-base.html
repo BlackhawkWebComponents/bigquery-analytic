@@ -1,0 +1,130 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../d3-elements/d3-import.html">
+
+<!--
+Element base for the `d3`  charts.
+
+@class bd3-base
+@blurb Element wrapper for the reD3 library.
+@status alpha
+@snap snap.png
+-->
+<polymer-element name="bd3-base" attributes="width height data dataSourceId">
+
+    <template>
+
+        <link href="../reD3/dist/css/reD3.css" rel="stylesheet">
+
+        <style>
+
+            :host {
+                display: inline-block;
+                position: relative;
+            }
+
+            #chart {
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                border: 1px solid #DEDEDE;
+            }
+
+        </style>
+
+        <div id="chart"></div>
+
+    </template>
+
+    <script>
+
+        Polymer('bd3-base', {
+
+            /**
+             * Title of chart
+             *
+             * @attribute title
+             * @type String
+             */
+            title: '',
+
+            /**
+             * Chart width, in pixels.
+             *
+             * @attribute width
+             * @type Number
+             */
+            width: 500,
+
+            /**
+             * Chart height, in pixels.
+             *
+             * @attribute height
+             * @type Number
+             */
+            height: 400,
+
+            /**
+             * Data model rendered to the chart.
+             * @attribute data
+             * @type Array
+             */
+            data: [],
+
+            dataSourceId: '',
+
+            ready: function() {
+                this.widthChanged();
+                this.heightChanged();
+            },
+
+            domReady: function() {
+                this.connectOptionalDataSource();
+            },
+
+            connectOptionalDataSource: function() {
+                var dataSource = this.querySelector('d3-tsv') || this.querySelector('d3-csv');
+                if (!dataSource && this.dataSourceId) {
+                    var findScope = function(node) {
+                        if (!findScope(node)) {
+                            return node;
+                        }
+                        return node.parentNode;
+                    };
+                    var scope = findScope(this);
+                    dataSource = scope.querySelector('#' + this.dataSourceId);
+                }
+                if (dataSource) {
+                    this.data = dataSource.data;
+                    dataSource.addEventListener('d3-load', function() {
+                        this.data = dataSource.data;
+                    }.bind(this));
+                }
+            },
+
+            widthChanged: function() {
+                this.style.width = this.width + 'px';
+                if (this.svg)
+                    this.resize();
+            },
+
+            heightChanged: function() {
+                this.style.height = this.height + 'px';
+                if (this.svg)
+                    this.resize();
+            },
+
+            dataChanged: function() {
+                if (!this.svg) {
+                    this.constructChart();
+                }
+                //console.log(this.localName, 'dataChanged', this.data, this.chart);
+                this.render(this.data);
+            }
+
+        });
+
+    </script>
+
+</polymer-element>

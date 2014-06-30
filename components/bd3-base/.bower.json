@@ -1,0 +1,36 @@
+{
+  "name": "bd3-base",
+  "homepage": "http://blackhawkwebcomponents.github.io/bd3-base",
+  "description": "",
+  "main": "bd3-base.html",
+  "authors": [
+    "Rob Beers"
+  ],
+  "license": "Apache2",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "../"
+  ],
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "reD3-elements": "PolymerLabs/reD3-elements"
+  },
+  "_release": "c9c190ddef",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c9c190ddefb559e41956e0a1e42aca4e25255564"
+  },
+  "_source": "git://github.com/BlackhawkWebComponents/bd3-base.git",
+  "_target": "*",
+  "_originalSource": "BlackhawkWebComponents/bd3-base"
+}

@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+
+  <title>reD3-elements Demo</title>
+  <script src="../platform/platform.js"></script>
+  <link rel="import" href="reD3-elements.html">
+
+</head>
+<body unresolved>
+
+  <reD3-line xValue="date" yValue="close" yAxisText="Price ($)"></reD3-line>
+
+  <reD3-pie text="age" color="age" value="population"></reD3-pie>
+
+  <reD3-bar xValue="letter" yValue="frequency" yAxisText="Frequency"></reD3-bar>
+
+  <reD3-stackedarea interpolation="linear"></reD3-stackedarea>
+
+  <reD3-line xValue="x" yValue="y" yAxisText="Y" data='[{"x": 0, "y": 100}, {"x": 1, "y": 110}, {"x": 2, "y": 200}, {"x": 3, "y": 250}]'></reD3-line>
+
+  <script>
+
+    addEventListener('polymer-ready', function() {
+
+      var $ = function(selector) { return document.querySelector(selector); };
+
+      // fetch and massage data, apply to chart
+      d3.tsv("../reD3/dist/data/line.tsv", function(error, data) {
+        var parseDate = d3.time.format("%d-%b-%y").parse;
+        data.forEach(function(d) {
+          d.date = parseDate(d.date);
+          d.close = +d.close;
+        });
+        $('reD3-line').data = data;
+      });
+
+      // fetch and massage data, apply to chart
+      d3.csv("../reD3/dist/data/pieb.csv", function(error, data) {
+        data.forEach(function(d) {
+          d.population = +d.population;
+        });
+        $('reD3-pie').data = data;
+      });
+
+      // fetch and massage data, apply to chart
+      d3.tsv("../reD3/dist/data/bar.tsv", function(error, data) {
+        data.forEach(function(d) {
+          d.frequency = +d.frequency;
+        });
+        $('reD3-bar').data = data;
+      });
+
+      // fetch and massage data, apply to chart
+      d3.csv("../reD3/dist/data/sa.csv", function(data) {
+        var parseDate = d3.time.format("%m/%d/%y").parse;
+        data.forEach(function(d) {
+          d.date = parseDate(d.date);
+          d.value = +d.value;
+        });
+        $('reD3-stackedarea').data = data;
+      });
+
+    });
+
+  </script>
+
+</body>
+</html>

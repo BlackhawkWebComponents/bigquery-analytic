@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>bd3-bar-chart Demo</title>
+
+    <script src="../platform/platform.js"></script>
+
+    <link rel="import" href="bd3-bar-chart.html">
+
+</head>
+<body unresolved>
+
+<p>Here is an example of bd3-bar-chart element</p>
+
+<template id="autobind" is="auto-binding">
+    <p>
+        Title: <input type="text" value="{{title}}"/>
+        Height: <input type="text" value="{{height}}"/>
+        Width: <input type="text" value="{{width}}"/>
+    </p>
+    <p>
+        Height is {{height}}, Width is {{width}}
+    </p>
+    <p>
+        Selected Name: {{name}}<br>
+        Selected Value: {{value}}
+    </p>
+
+
+    <bd3-bar-chart
+            title="{{title}}"
+            data="{{data}}"
+            width="{{width}}"
+            height="{{height}}"
+            xValue="name"
+            yValue="value"
+            yAxisText="Count"
+            on-bar-clicked="{{barClicked}}">
+    </bd3-bar-chart>
+
+
+</template>
+
+<script>
+    var t = document.querySelector("#autobind");
+    t.title = "My Example Bar Chart";
+    t.height = 300;
+    t.width = 600;
+    /*t.data = [
+        {"name":"Locke and Harris Company","value":4},
+        {"name":"Reyes and Smith Company","value":8},
+        {"name":"Ford","value":15},
+        {"name":"Jarrah","value":16},
+        {"name":"Shephard","value":23},
+        {"name":"Kwon","value":42}
+    ];*/
+    t.barClicked = function(e, detail) {
+        console.log('bar-cliked = ' + JSON.stringify(detail));
+        t.name = detail.name;
+        t.value = detail.value;
+    };
+
+</script>
+
+</body>
+</html>

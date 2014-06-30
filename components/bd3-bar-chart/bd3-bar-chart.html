@@ -1,0 +1,289 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../bd3-base/bd3-base.html">
+
+<!--
+Element that displays a vertical d3 bar chart.
+
+    <bd3-bar-chart data="{{data}}"
+            width="{{width}}"
+            height="{{height}}"
+            xValue="name"
+            yValue="value"
+            yAxisText="Count"
+            on-bar-clicked="{{barClicked}}">
+    </bd3-bar-chart>
+
+    data = [
+        {"name":"Locke and Harris Company","value":4},
+        {"name":"Reyes and Smith Company","value":8},
+        {"name":"Ford","value":15},
+        {"name":"Jarrah","value":16},
+        {"name":"Shephard","value":23},
+        {"name":"Kwon","value":42}
+    ];
+
+    barClicked : function(e, detail) {
+        this.name = detail.name;
+        this.value = detail.value;
+    };
+
+@class bd3-bar-chart
+@blurb Element that displays a vertical d3 bar chart
+@status alpha
+@snap snap.png
+-->
+<polymer-element name="bd3-bar-chart" extends="bd3-base" attributes="xValue yValue yAxisText">
+
+    <template>
+
+        <link href="../bd3-base/bd3-base.css" rel="stylesheet">
+
+        <style>
+
+
+        </style>
+
+        <div id="chart"></div>
+
+    </template>
+
+    <script>
+        // TODO: figure out why these have to be outside
+        var x, y;
+
+        Polymer('bd3-bar-chart', {
+            /**
+             * Fired when a bar in chart is clicked.
+             *
+             * @event bar-clicked
+             */
+
+            /**
+             * Title of chart
+             *
+             * @attribute title
+             * @type String
+             */
+
+            /**
+             * Chart width, in pixels.
+             *
+             * @attribute width
+             * @type Number
+             */
+
+            /**
+             * Chart height, in pixels.
+             *
+             * @attribute height
+             * @type Number
+             */
+
+            /**
+             * Object value in data array that will be used in for x axis.
+             *
+             * @attribute xValue
+             * @type String
+             */
+
+            /**
+             * Object value in data array that will be used in for y axis.
+             *
+             * @attribute yValue
+             * @type String
+             */
+
+            /**
+             * Text to be displayed on y axis.
+             *
+             * @attribute yAxisText
+             * @type String
+             */
+
+            /**
+             * Data model rendered to the chart.
+             * @attribute data
+             * @type Array
+             */
+
+            ready: function() {
+                // used for example, TODO: put these items into actual elements, something like <chart-item>
+                this.data = [{"name":"Locke and Harris Company","value":4},
+                {"name":"Reyes and Smith Company","value":8},
+                {"name":"Ford","value":15},
+                {"name":"Jarrah","value":16},
+                {"name":"Shephard","value":23},
+                {"name":"Kwon","value":42}];
+            },
+            constructChart: function() {
+
+                var chart = this.$.chart;
+                var width = parseInt(d3.select(chart).style('width'), 10),
+                    height = parseInt(d3.select(chart).style('height'), 10);
+
+                var margin = {
+                    top: 80,
+                    right: 20,
+                    bottom: 40,
+                    left: 40
+                };
+
+                this.margin = margin;
+
+                width = this.svgWidth = width - margin.left - margin.right;
+                height =  this.svgHeight = height - margin.top - margin.bottom;
+
+                var formatPercent = this.formatPercent = d3.format("");
+
+                x = d3.scale.ordinal()
+                        .rangeRoundBands([0, width], .1);
+
+                y = d3.scale.linear()
+                        .range([height, 0]);
+
+                this.xAxis = d3.svg.axis()
+                        .scale(x)
+                        .orient("bottom");
+
+                this.yAxis = d3.svg.axis()
+                        .scale(y)
+                        .orient("left")
+                        .tickFormat(formatPercent);
+
+                this.svg = d3.select(chart).append("svg")
+                        .attr("width", width + margin.left + margin.right)
+                        .attr("height", height + margin.top + margin.bottom)
+                        .append("g")
+                        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            },
+            render: function(data) {
+                var xAxis = this.xAxis,
+                    yAxis = this.yAxis,
+                    svg = this.svg,
+                    /*width = this.width,
+                    height = this.height,(*/
+                    width = this.svgWidth,
+                    height = this.svgHeight,
+                    title = this.title || '',
+                    yAxisText = this.yAxisText || '',
+                    yValue = this.yValue,
+                    xValue = this.xValue;
+
+                x.domain(data.map(function(d) {
+                    return d[xValue];
+                }));
+                y.domain([0, d3.max(data, function(d) {
+                    return d[yValue];
+                })]);
+
+                svg.append("text")
+                        .attr("x", 0)
+                        .attr("y", -50)
+                        .attr("class","title")
+                        .text(title);
+
+                svg.append("g")
+                        .attr("class", "x axis")
+                        .attr("transform", "translate(0," + height + ")")
+                        .call(xAxis)
+                        .selectAll(".tick text")
+                        .call(this.wrap, x.rangeBand());
+
+
+                svg.append("g")
+                        .attr("class", "y axis")
+                        .call(yAxis)
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 6)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text(yAxisText);
+
+                var bars = svg.selectAll(".bar")
+                        .data(data)
+                        .enter().append("rect")
+                        .attr("class", "bar")
+                        .attr("x", function(d) {
+                            return x(d[xValue]);
+                        })
+                        .attr("width", x.rangeBand())
+                        .attr("y", function(d) {
+                            return y(d[yValue]);
+                        })
+                        .attr("height", function(d) {
+                            return height - y(d[yValue]);
+                        });
+
+                bars.on('mousedown', (function(d) {
+                   this.fire('bar-clicked', d);
+                }).bind(this));
+
+                bars.on('mouseover', (function(d) {
+                    this.fire('bar-mouseover', d);
+                }).bind(this));
+
+                bars.on('mouseout', (function(d) {
+                    this.fire('bar-mouseout', d);
+                }).bind(this));
+            },
+            resize: function() {
+                /* broken at the moment
+
+                // update width
+                this.svgHeight = parseInt(d3.select(this.$.chart).style('height'), 10);
+                this.svgHeight = this.svgHeight - this.margin.top - this.margin.bottom;
+
+                console.log('new svgHeight: ' + this.svgHeight);
+
+                // resize the chart
+                y.range([this.svgHeight, 0]);
+
+                d3.select(this.svg.node().parentNode)
+                        .style('height', (this.svgHeight + this.margin.top + this.margin.bottom) + 'px');
+
+                this.svg.selectAll('rect.bar')
+                        .attr('height', (function(d) {
+                            return  this.svgHeight - y(d[this.yValue]);
+                        }).bind(this));
+                */
+
+
+            },
+            titleChanged: function() {
+                if (this.svg && this.svg.select('text.title')) {
+                    this.svg.select('text.title')
+                            .text(this.title);
+                }
+            },
+            wrap: function(text, width) {
+                text.each(function() {
+                    var text = d3.select(this),
+                            words = text.text().split(/\s+/).reverse(),
+                            word,
+                            line = [],
+                            lineNumber = 0,
+                            lineHeight = 1.1, // ems
+                            y = text.attr("y"),
+                            dy = parseFloat(text.attr("dy")),
+                            tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+                    while (word = words.pop()) {
+                        line.push(word);
+                        tspan.text(line.join(" "));
+                        if (tspan.node().getComputedTextLength() > width) {
+                            line.pop();
+                            tspan.text(line.join(" "));
+                            line = [word];
+                            tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+                        }
+                    }
+                });
+            }
+
+        });
+
+    </script>
+
+</polymer-element>
+

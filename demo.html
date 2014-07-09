@@ -21,7 +21,9 @@
             title="Iraq - Actor1 Groups June 2014"
             projectId="blackhawk-website"
             chartType="bar"
-            on-analytic-item-selected="{{analyticItemSelected}}">
+            on-analytic-item-selected="{{analyticItemSelected}}"
+            xValue="actor1knowngroupcode"
+            yValue="actor1_knowngroup_count">
         <q-select>
             <q-field expr="actor1knowngroupcode"></q-field>
             <q-field expr="count(*)" as="actor1_knowngroup_count"></q-field>

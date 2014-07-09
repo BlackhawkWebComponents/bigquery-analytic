@@ -1,7 +1,8 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../analytic-base/analytic-base.html">
 <link rel="import" href="../bigquery-api/bigquery-api.html">
 <link rel="import" href="../bigquery-query/bigquery-query.html">
-<link rel="import" href="../bd3-bar-chart/bd3-bar-chart.html">
+<link rel="import" href="../chart-js/chart-js.html">
 
 <!--
 Element providing analytic graph for google big query
@@ -11,7 +12,7 @@ Element providing analytic graph for google big query
     <bigquery-analytic
         title="Actor Known Groups"
         projectId="blackhawk-website"
-        chartType="bar">
+        chartType="Bar">
 
         <q-select>
             <q-field expr="actor1knowngroupcode"></q-field>
@@ -26,7 +27,7 @@ Element providing analytic graph for google big query
                 op="isnotnull"></q-condition>
             <q-condition
                 field="actiongeo_countrycode"
-                op="equals" 
+                op="equals"
                 value="'IZ'"></q-condition>
             <q-condition
                 field="year"
@@ -40,81 +41,71 @@ Element providing analytic graph for google big query
 @element bigquery-analytic
 @blurb Element providing analytic graph for google big query
 @status alpha
+@extends analytic-base
 @url http://blackhawkwebcomponents.github.io/bigquery-analytic
 -->
+<!-- TODO: you should NOT have to pass in xValue yValue, figure this out -->
 <polymer-element name="bigquery-analytic"
-                 attributes="title chartType projectId"
-                 on-query-change="{{queryChanged}}">
+                 extends="analytic-base"
+                 attributes="projectId">
     <template>
-        <style></style>
+        <!--
+        <style>
+            :host {
+                display: block;
+                position: relative;
+            }
+        </style>
+        -->
 
-        <bigquery-query outputQuery="{{query}}">
+        <bigquery-query outputQuery="{{query}}" limit="{{limit}}">
             <content select="q-select"></content>
             <content select="q-from"></content>
             <content select="q-where"></content>
             <content select="q-group-by"></content>
         </bigquery-query>
 
-        <bigquery-api query="{{query.sql}}"
+        <bigquery-api id="bigquery"
+                      query="{{query.sql}}"
                       projectId="{{projectId}}"
-                      response="{{response}}">
+                      on-bigquery-response="{{gotResponse}}">
         </bigquery-api>
 
-        <!-- TODO: add support for more charts, maybe make this something the user of this element provides -->
-        <template if="{{chartType == 'bar'}}">
-            <bd3-bar-chart
-                    title="{{title}}"
+        <shadow></shadow>
+
+        <!--
+        <template if="{{chartReady}}">
+            <chart-js
+                    kind="{{chartType}}"
+                    showLegend="{{showLegend}}"
                     data="{{chartData}}"
-                    width="900"
-                    height="500"
-                    xValue="actor1knowngroupcode"
-                    yValue="actor1_knowngroup_count"
-                    yAxisText="Count"
-                    on-bar-clicked="{{analyticItemSelected}}">
-            </bd3-bar-chart>
+                    on-chart-items-selected="{{analyticItemSelected}}">
+            </chart-js>
         </template>
+        <template if="{{queryRunning}}">
+            <div>loading...</div>
+        </template>
+        -->
 
     </template>
     <script>
         Polymer('bigquery-analytic', {
-            /**
-             * Fired when a analytic item is clicked on chart
-             *
-             * @event analytic-item-selected
-             */
-
-            /**
-             * A title to be displayed on top of the analytic.
-             * @attribute title
-             * @type string
-             */
-            title: 'My Analytic',
-            /**
-             * Type of chart to be used (bar, ...)
-             * @attribute chartType
-             * @type string
-             */
-            chartType: null,
             /**
              * Google Big Query project Id to be used
              * @attribute projectId
              * @type string
              */
             projectId: null,
-            created: function () {
-                this.chartData = {};
+            runQuery: function() {
+                this.$.bigquery.runQuery();
             },
-            responseChanged: function() {
-                this.chartData = this.chartFormat(this.response);
+            gotResponse: function(event, detail) {
+                this.response = detail.response;
             },
-            queryChanged: function(event, detail) {
-                console.log('query changed: ' + JSON.stringify(detail));
-            },
-            json: function(value) {
-                return JSON.stringify(value, null, 2);
-            },
-            chartFormat: function(value) {
+            commonChartFormat: function(value) {
                 var bqResponse = value;
+
+                // preprocess step, will make it easier to work with??
                 var arr = [];
                 if (bqResponse && bqResponse.rows) {
                     for (var i = 0; i < bqResponse.rows.length; ++i) {
@@ -131,11 +122,29 @@ Element providing analytic graph for google big query
                         arr.push(outrow);
                     }
                 }
-                return arr;
-            },
-            analyticItemSelected: function(event, detail) {
-                this.fire('analytic-item-selected', detail);
+
+                console.log('arr: ' + JSON.stringify(arr, null, 2));
+
+                /**
+                 * We can get more sophisticated in the future but for now we will assume
+                 * first field is label and second is some sort of metric
+                 */
+                var labels = [];
+                var data = [];
+                for (var i = 0; i < arr.length; ++i) {
+                    labels.push(arr[i][bqResponse.schema.fields[0].name]);
+                    data.push(arr[i][bqResponse.schema.fields[1].name]);
+                }
+
+                var commonFormat = {
+                    labels:labels,
+                    data:data
+                };
+
+                return commonFormat;
+
             }
+
         });
     </script>
 </polymer-element>

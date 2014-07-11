@@ -44,10 +44,10 @@ Element providing analytic graph for google big query
 @extends analytic-base
 @url http://blackhawkwebcomponents.github.io/bigquery-analytic
 -->
-<!-- TODO: you should NOT have to pass in xValue yValue, figure this out -->
 <polymer-element name="bigquery-analytic"
                  extends="analytic-base"
-                 attributes="projectId">
+                 attributes="projectId"
+                 on-bigquery-response="{{gotResponse}}">
     <template>
         <!--
         <style>
@@ -66,9 +66,9 @@ Element providing analytic graph for google big query
         </bigquery-query>
 
         <bigquery-api id="bigquery"
+                      auto
                       query="{{query.sql}}"
-                      projectId="{{projectId}}"
-                      on-bigquery-response="{{gotResponse}}">
+                      projectId="{{projectId}}">
         </bigquery-api>
 
         <shadow></shadow>
@@ -97,12 +97,16 @@ Element providing analytic graph for google big query
              */
             projectId: null,
             runQuery: function() {
-                this.$.bigquery.runQuery();
+                // do nothing, bigquery is set to auto
+                //this.$.bigquery.runQuery();
             },
             gotResponse: function(event, detail) {
+                //console.log('gotResponse: ' + JSON.stringify(detail.response, this, null));
                 this.response = detail.response;
             },
             commonChartFormat: function(value) {
+                //console.log('processing commonChartFormat');
+                //console.log(JSON.stringify(value, null, 2));
                 var bqResponse = value;
 
                 // preprocess step, will make it easier to work with??
@@ -140,7 +144,7 @@ Element providing analytic graph for google big query
                     labels:labels,
                     data:data
                 };
-
+                //console.log('commonFormat: ' + JSON.stringify(commonFormat, null, 2));
                 return commonFormat;
 
             }

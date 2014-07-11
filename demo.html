@@ -6,13 +6,17 @@
 
     <script src="../platform/platform.js"></script>
     <link rel="import" href="bigquery-analytic.html">
+    <link rel="import" href="../google-signin/google-signin.html">
 
 </head>
 <body unresolved>
 
 <template is="auto-binding">
     <div>
-        <google-signin clientId="616981594512-9qhbmltja9bhuoh1rfl2mesej0qqj6b8.apps.googleusercontent.com"></google-signin>
+        <google-signin
+                clientId="616981594512-9qhbmltja9bhuoh1rfl2mesej0qqj6b8.apps.googleusercontent.com"
+                scopes="https://www.googleapis.com/auth/bigquery">
+        </google-signin>
     </div>
 
     <p>A <code>&lt;bigquery-analytic&gt;</code> looks like this:</p>
@@ -20,10 +24,8 @@
     <bigquery-analytic
             title="Iraq - Actor1 Groups June 2014"
             projectId="blackhawk-website"
-            chartType="bar"
-            on-analytic-item-selected="{{analyticItemSelected}}"
-            xValue="actor1knowngroupcode"
-            yValue="actor1_knowngroup_count">
+            chartType="Bar"
+            on-analytic-item-selected="{{analyticItemSelected}}">
         <q-select>
             <q-field expr="actor1knowngroupcode"></q-field>
             <q-field expr="count(*)" as="actor1_knowngroup_count"></q-field>

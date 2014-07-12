@@ -46,7 +46,7 @@ Element providing analytic graph for google big query
 -->
 <polymer-element name="bigquery-analytic"
                  extends="analytic-base"
-                 attributes="projectId"
+                 attributes="projectId authorized"
                  on-bigquery-response="{{gotResponse}}">
     <template>
         <!--
@@ -68,7 +68,8 @@ Element providing analytic graph for google big query
         <bigquery-api id="bigquery"
                       auto
                       query="{{query.sql}}"
-                      projectId="{{projectId}}">
+                      projectId="{{projectId}}"
+                      authorized="{{authorized}}">
         </bigquery-api>
 
         <shadow></shadow>
@@ -96,6 +97,7 @@ Element providing analytic graph for google big query
              * @type string
              */
             projectId: null,
+            authorized: false,
             runQuery: function() {
                 // do nothing, bigquery is set to auto
                 //this.$.bigquery.runQuery();

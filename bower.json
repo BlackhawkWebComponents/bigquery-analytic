@@ -24,7 +24,6 @@
     "dependencies": {
         "polymer": "Polymer/polymer#master",
         "bigquery-api": "BlackhawkWebComponents/bigquery-api",
-        "bigquery-query": "BlackhawkWebComponents/bigquery-query",
-        "bd3-bar-chart": "BlackhawkWebComponents/bd3-bar-chart"
+        "bigquery-query": "BlackhawkWebComponents/bigquery-query"
     }
 }
